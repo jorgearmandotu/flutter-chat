@@ -1,10 +1,12 @@
-
-import 'package:chat/widget/boton_azul.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:chat/services/auth_service.dart';
 import 'package:chat/widget/logo.dart';
+import 'package:chat/widget/boton_azul.dart';
 import 'package:chat/widget/labels.dart';
 import 'package:chat/widget/custom_imput.dart';
+import 'package:chat/helpers/mostrar_alerta.dart';
 
 
 class LoginPage extends StatelessWidget {
@@ -60,6 +62,8 @@ class _FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>( context );
     
     return Container(
       margin:  const EdgeInsets.only(top: 40),
@@ -83,9 +87,16 @@ class _FormState extends State<_Form> {
 
           BotonAzul(
             textBtn: 'Ingresar',
-            onPressed: (){
-              print(emailCtrl.text);
-              print(passwordCtrl.text);
+            onPressed: authService.autenticando ? null : () async {
+              FocusScope.of(context).unfocus();
+              final loginOk = await authService.login( emailCtrl.text.trim(), passwordCtrl.text.trim() );
+
+              if (loginOk){
+                //TODO:conectar anuestro socket server
+                Navigator.pushReplacementNamed(context, 'usuarios');
+              } else {
+                mostrarAlerta(context, 'Login Incorrecto', 'Las credenciales no coinciden');
+              }
             },
           ),
           
@@ -95,4 +106,3 @@ class _FormState extends State<_Form> {
     );
   }
 }
-
