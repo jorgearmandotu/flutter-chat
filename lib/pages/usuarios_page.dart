@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:chat/services/auth_service.dart';
+import '../services/socket_service.dart';
+
 import 'package:chat/models/usuario.dart';
 
 class UsuariosPage extends StatefulWidget {
@@ -26,16 +27,19 @@ class _UsuariosPageState extends State<UsuariosPage> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
-    final usuario = authService.getusuario;
+    final socketService = Provider.of<SocketService>( context );
+
+    final usuario = authService.usuario;
+    
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text(usuario != null ? usuario.nombre : 'name', style: const TextStyle(color: Colors.black87),)),
+        title: Center(child: Text(usuario?.nombre ?? 'no name', style: const TextStyle(color: Colors.black87),)),
         elevation: 1,
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.exit_to_app, color: Colors.black87,),
           onPressed: () {
-            //TODO: desconectar de socke server
+            socketService.disconnect();
             Navigator.pushReplacementNamed(context, 'login');
             AuthService.deleteToken();
           },
@@ -43,8 +47,9 @@ class _UsuariosPageState extends State<UsuariosPage> {
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 10),
-            child: Icon(Icons.check_circle_outline, color: Colors.blue[400]),
-            //child: Icon(Icons.offline_bolt, color: Colors.red,),
+            child: (socketService.serverStatus == ServerStatus.Online)
+            ? Icon( Icons.check_circle_outline, color: Colors.blue[400])
+            : Icon(Icons.offline_bolt, color: Colors.red,),
           )
         ],
       ),

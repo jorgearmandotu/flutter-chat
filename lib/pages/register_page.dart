@@ -9,6 +9,7 @@ import 'package:chat/widget/custom_imput.dart';
 
 import '../helpers/mostrar_alerta.dart';
 import '../services/auth_service.dart';
+import '../services/socket_service.dart';
 
 
 class RegisterPage extends StatelessWidget {
@@ -71,6 +72,7 @@ class _FormState extends State<_Form> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>( context );
+    final socketService = Provider.of<SocketService>( context );
     
     return Container(
       margin:  const EdgeInsets.only(top: 40),
@@ -105,7 +107,7 @@ class _FormState extends State<_Form> {
               FocusScope.of( context).unfocus();
               final registerOk = await authService.register(nameCtrl.text.trim(), emailCtrl.text.trim(), passwordCtrl.text.trim());
               if(registerOk == true){
-                //TODO: conectar a socket server
+                socketService.connect();
                 Navigator.pushReplacementNamed(context, 'usuarios');
               } else{
                 mostrarAlerta(context, 'Registro Incorrecto', registerOk);
